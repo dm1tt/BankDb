@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 
 namespace Bank
 {
-    internal class QueryTool
-    {
+    
+     public class QueryTool:IQueryTool
+     {
         private static NpgsqlConnection GetConnection()
         {
             return new NpgsqlConnection(@"Server=localhost;Port=5433;User Id=postgres;Password=1234;Database=BankDirectory;");
@@ -44,7 +45,7 @@ namespace Bank
             return resultOfQuery;
         }
 
-        public void GeneralInsertQuery(string fullName, string telephone, string city, string country, string requisites)
+        static void GeneralInsertQuery(string fullName, string telephone, string city, string country, string requisites)
         {
             if (SelectExists(@"select exists (select * from ""Residence"" where ""City"" = '"+city+"' )"))
             {
@@ -57,12 +58,15 @@ namespace Bank
                 InsertUpdateDelete(@"insert into ""Client""(""FullName"", ""CityId"", ""Requisites"") values ('" + fullName + "', '" + Select(@"select ""CityId"" from ""Residence"" where ""City"" = '" + city + "';") + "', '" + requisites + "')");
             } 
             
-            InsertUpdateDelete(@"insert into ""Telephone"" (""UserId"", ""Phone"") values ('" + Select(@"select ""UserId"" from ""Client"" where ""FullName"" = '" + fullName + "'") + "', '" + telephone + "')");  
+            InsertUpdateDelete(@"insert into telephone (""UserId"", ""Phone"") values ('" + Select(@"select ""UserId"" from ""Client"" where ""FullName"" = '" + fullName + "'") + "', '" + telephone + "')");  
         }
 
-        public void GeneralDeleteQuery(string fullName, string telephone, string city, string country, string requisites)
-        {
+        //public void GeneralDeleteQuery(string fullName, string telephone, string city, string country, string requisites)
+        //{
+        //    if (SelectExists())
+        //    {
 
-        }
+        //    }
+        //}
     }
 }
