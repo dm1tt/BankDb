@@ -82,4 +82,8 @@ namespace Bank;
         SqlQuery($"delete from client where user_id = '{userId}'");
     }
 
+    public void UpdateQuery(string fullName, string phone, string requisites, string city, string country)
+    {
+
+    }
 }
