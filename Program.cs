@@ -13,10 +13,11 @@ internal class Program
 
     private static void Main(string[] args)
     {
-        int userId = Convert.ToInt32(Console.ReadLine());
+        Communication test = new();
+        test.Dialog();
 
-        IQueryTool user = new QueryTool();
-        user.DeleteQuery(userId);
+        //IQueryTool user = new QueryTool();
+        //user.DeleteQuery(userId);
     }       
 
 }

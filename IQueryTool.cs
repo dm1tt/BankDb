@@ -8,10 +8,9 @@ namespace Bank;
 
 public interface IQueryTool
 {
-    public void InsertQuery(string fullName, string phone, string requisites, string city, string country);
+    public string InsertQuery(string fullName, string phone, string requisites, string city, string country);
     public void DeleteQuery(int userId);
-
-    public void UpdateQuery(string fullName, string phone, string requisites, string city, string country);
-    public void Select();
+    public void ListCompletion();
+    public void SelectQuery();
     
 }
