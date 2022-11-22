@@ -44,7 +44,7 @@ namespace Bank;
         con.Close();
        
     }
-    private string ReturnId(string query)
+    private string ReturnId(string query)       //ПРИ ВВОДЕ СУЩЕСТВУЮЕГО ГОРОДА ВЫДАЕТСЯ ИСКЛЮЧЕНИЕ ВОЗВРАЩАЕТСЯ NULL
     {
         NpgsqlCommand test = new(query, con);
         con.Open();
@@ -68,7 +68,7 @@ namespace Bank;
         }
         else
         {
-            userId = ReturnId($"insert into client (fullName, city_id, requisites) values ('{fullName}', '{Convert.ToInt32(dbQuery[dbQuery.IndexOf(city) - 1])}', '{requisites}')");
+            userId = ReturnId($"insert into client (fullName, city_id, requisites) values ('{fullName}', '{Convert.ToInt32(dbQuery[dbQuery.Count - 3])}', '{requisites}')");
             SqlQuery($"insert into telephone (user_id, phone) values ('{userId}', '{phone}')");
         }
         return userId;
@@ -77,8 +77,31 @@ namespace Bank;
     {
         SqlQuery($"delete from client where user_id = '{userId}'");
     }
-    public void SelectQuery()
+    public void GlobalSelectQuery()
     {
-        
+        NpgsqlCommand command = new("select client.fullname, telephone.phone, residence.city, residence.country, client.requisites from client join telephone on client.user_id = telephone.user_id join residence on client.city_id = residence.city_id;", con);
+        con.Open();
+        NpgsqlDataReader reader = command.ExecuteReader();
+        if (reader.HasRows)
+        {
+            while (reader.Read())
+            {
+                Console.WriteLine("{0, 0}  {1, 10}  {2, 10}  {3, 10}  {4, 10}", reader[0], reader[1], reader[2], reader[3], reader[4]);
+            }
+        }
+        reader.Close();
+        con.Close();
+    }
+    public void SingleSelectQuery(int userId)
+    {
+        NpgsqlCommand command = new($"select client.fullname, telephone.phone, residence.city, residence.country, client.requisites from client join telephone on client.user_id = telephone.user_id join residence on client.city_id = residence.city_id where client.user_id = {userId}", con);
+        con.Open();
+        NpgsqlDataReader reader = command.ExecuteReader();
+        if (!reader.HasRows)
+        {
+            Console.WriteLine("Пользователь с таким ID не найден");           
+        }
+        else Console.WriteLine("{0, 0}  {1, 10}  {2, 10}  {3, 10}  {4, 10}", reader[0], reader[1], reader[2], reader[3], reader[4]);
+        con.Close();
     }
 }

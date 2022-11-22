@@ -11,6 +11,7 @@ public interface IQueryTool
     public string InsertQuery(string fullName, string phone, string requisites, string city, string country);
     public void DeleteQuery(int userId);
     public void ListCompletion();
-    public void SelectQuery();
-    
+    public void GlobalSelectQuery();
+    public void SingleSelectQuery(int userId);
+
 }

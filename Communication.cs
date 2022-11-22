@@ -18,6 +18,7 @@ public class Communication
     }
     private void StartMenu()
     {
+        Console.WriteLine("------------------------------------");
         Console.WriteLine("Выберите операцию:");
         Console.WriteLine("1. Добавить нового пользователя");
         Console.WriteLine("2. Удалить пользователя");
@@ -50,6 +51,7 @@ public class Communication
 
         Console.WriteLine("Пользователь успешно добавлен!");
         Console.WriteLine($"Id добавленного пользователя: {userId}");
+
     }
 
     private void DeleteMenu()
@@ -59,6 +61,13 @@ public class Communication
         user.DeleteQuery(userId);
         Console.WriteLine();
         Console.WriteLine("Пользователь успешно удален!");
+    }
+    private void SelecUserMenu()
+    {
+        Console.WriteLine("Введите ID пользователя");
+        int userId = Convert.ToInt32(Console.ReadLine());
+        user.SingleSelectQuery(userId);
+        Console.WriteLine();
     }
     public void Dialog()
     {
@@ -83,12 +92,17 @@ public class Communication
             }
             else if(escape.Key == ConsoleKey.D3)
             {
-
+                
             }
             else if (escape.Key == ConsoleKey.D4)
             {
                 Console.WriteLine();
-                user.SelectQuery();
+                user.GlobalSelectQuery();
+            }
+            else if(escape.Key == ConsoleKey.D5)
+            {
+                Console.WriteLine();
+                SelecUserMenu();
             }
         }
     }
