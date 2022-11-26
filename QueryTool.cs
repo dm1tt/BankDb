@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using System.Diagnostics.Metrics;
 
 namespace Bank;
 
@@ -67,14 +68,14 @@ public class QueryTool : IQueryTool
     }
     public void GlobalSelectQuery()
     {
-        NpgsqlCommand command = new("select client.fullname, telephone.phone, residence.city, residence.country, client.requisites from client join telephone on client.user_id = telephone.user_id join residence on client.city_id = residence.city_id;", con);
+        NpgsqlCommand command = new("select client.user_id, client.fullname, telephone.phone, residence.city, residence.country, client.requisites from client join telephone on client.user_id = telephone.user_id join residence on client.city_id = residence.city_id;", con);
         con.Open();
         NpgsqlDataReader reader = command.ExecuteReader();
         if (reader.HasRows)
         {
             while (reader.Read())
             {
-                Console.WriteLine("{0, 0}  {1, 10}  {2, 10}  {3, 10}  {4, 10}", reader[0], reader[1], reader[2], reader[3], reader[4]);
+                Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}", reader[0], reader[1], reader[2], reader[3], reader[4], reader[5]);
             }
         }
         reader.Close();
@@ -104,13 +105,17 @@ public class QueryTool : IQueryTool
         {
             SqlQuery($"update client set fullname = '{newUserData}' where user_id = {userId}");
         }
-        else if (userAnswer == 2)
-        {
+        else if (userAnswer == 2 && newUserData.Length == 11)
+        {            
             SqlQuery($"update telephone set phone = '{newUserData}' where user_id = {userId}");
         }
-        else if (userAnswer == 4)
+        else if (userAnswer == 4 && newUserData.Length == 9)
         {
             SqlQuery($"update client set requisites = '{newUserData}' where user_id = {userId}");
+        }
+        else
+        {
+            Console.WriteLine("Ошиибка: некорректный ввод.");
         }
     }
     public void UpdateQuery(int userId, string newCity, string newCountry)
@@ -120,11 +125,12 @@ public class QueryTool : IQueryTool
         {
             dbQueryResidence.AddRange(new[] { (Convert.ToInt32(dbQueryResidence[dbQueryResidence.Count - 3]) + 1).ToString(), newCity, newCountry });
 
-            SqlQuery($"update client set city_id = '{Convert.ToInt32(dbQueryResidence[dbQueryResidence.Count - 3])}' where user_id = {userId}");
+            SqlQuery($"insert into residence (city, country) values ('{newCity}','{newCountry}')");
+            SqlQuery($"update client set city_id = '{dbQueryResidence[dbQueryResidence.IndexOf(newCity) - 1]}' where user_id = {userId}");
         }
         else
         {
-            SqlQuery($"update client set city_id = '{dbQueryResidence[dbQueryResidence.IndexOf(newCity) - 1]}'"); //индекс выходить за рамки внешнего ключа исправить
+            SqlQuery($"update client set city_id = '{dbQueryResidence[dbQueryResidence.IndexOf(newCity) - 1]}' where user_id = {userId}"); //индекс выходить за рамки внешнего ключа исправить
         }
 
     }
