@@ -1,23 +1,16 @@
 ﻿using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bank;
 
- public class QueryTool:IQueryTool
- {
+public class QueryTool : IQueryTool
+{
     private readonly NpgsqlConnection con;
-    private List<string> dbQuery;
-    
+    private List<string> dbQueryResidence;
+
     public QueryTool()
     {
         con = new NpgsqlConnection(@"Server=localhost;Port=5432;User Id=postgres;Password=1234;Database=directory;");
-        dbQuery = new List<string>();
+        dbQueryResidence = new List<string>();
     }
     private void SqlQuery(string insertQuery)
     {
@@ -33,42 +26,37 @@ namespace Bank;
         NpgsqlDataReader reader = command.ExecuteReader();
         if (reader.HasRows)
         {
-            while(reader.Read())
+            while (reader.Read())
             {
-                dbQuery.Add(reader.GetInt32(0).ToString());
-                dbQuery.Add(reader.GetString(1));
-                dbQuery.Add(reader.GetString(2));
+                dbQueryResidence.AddRange(new[] { reader.GetInt32(0).ToString(), reader.GetString(1), reader.GetString(2) });
             }
         }
         reader.Close();
         con.Close();
-       
     }
-    private string ReturnId(string query)       //ПРИ ВВОДЕ СУЩЕСТВУЮЕГО ГОРОДА ВЫДАЕТСЯ ИСКЛЮЧЕНИЕ ВОЗВРАЩАЕТСЯ NULL
+    private int ReturnId(string query)
     {
         NpgsqlCommand test = new(query, con);
         con.Open();
-        string result = test.ExecuteScalar().ToString();
+        int result = Convert.ToInt32(test.ExecuteScalar());
         con.Close();
         return result;
     }
-    public string InsertQuery(string fullName, string phone, string requisites, string city, string country)
+    public int InsertQuery(string fullName, string phone, string requisites, string city, string country)
     {
-        string userId;
-        if(!dbQuery.Contains(city))
+        int userId;
+        if (!dbQueryResidence.Contains(city))
         {
 
-            dbQuery.Add((Convert.ToInt32(dbQuery[dbQuery.Count - 3]) + 1).ToString());
-            dbQuery.Add(city);
-            dbQuery.Add(country);            
+            dbQueryResidence.AddRange(new[] { (Convert.ToInt32(dbQueryResidence[dbQueryResidence.Count - 3]) + 1).ToString(), city, country });
 
             SqlQuery($"insert into residence (city, country) values ('{city}','{country}')");
-            userId = ReturnId($"insert into client (fullName, city_id, requisites) values ('{fullName}', '{Convert.ToInt32(dbQuery[dbQuery.Count - 3])}', '{requisites}') returning user_id");
+            userId = ReturnId($"insert into client (fullName, city_id, requisites) values ('{fullName}', '{Convert.ToInt32(dbQueryResidence[dbQueryResidence.Count - 3])}', '{requisites}') returning user_id");
             SqlQuery($"insert into telephone (user_id, phone) values ('{userId}', '{phone}')");
         }
         else
         {
-            userId = ReturnId($"insert into client (fullName, city_id, requisites) values ('{fullName}', '{Convert.ToInt32(dbQuery[dbQuery.Count - 3])}', '{requisites}')");
+            userId = ReturnId($"insert into client (fullName, city_id, requisites) values ('{fullName}', '{dbQueryResidence[dbQueryResidence.IndexOf(city) - 1]}', '{requisites}') returning user_id");
             SqlQuery($"insert into telephone (user_id, phone) values ('{userId}', '{phone}')");
         }
         return userId;
@@ -99,9 +87,46 @@ namespace Bank;
         NpgsqlDataReader reader = command.ExecuteReader();
         if (!reader.HasRows)
         {
-            Console.WriteLine("Пользователь с таким ID не найден");           
+            Console.WriteLine("Пользователь с таким ID не найден");
         }
-        else Console.WriteLine("{0, 0}  {1, 10}  {2, 10}  {3, 10}  {4, 10}", reader[0], reader[1], reader[2], reader[3], reader[4]);
+        else
+        {
+            while (reader.Read())
+            {
+                Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{}", reader[0], reader[1], reader[2], reader[3], reader[4]);
+            }
+        }
         con.Close();
     }
+    public void UpdateQuery(int userId, int userAnswer, string newUserData)
+    {
+        if (userAnswer == 1)
+        {
+            SqlQuery($"update client set fullname = '{newUserData}' where user_id = {userId}");
+        }
+        else if (userAnswer == 2)
+        {
+            SqlQuery($"update telephone set phone = '{newUserData}' where user_id = {userId}");
+        }
+        else if (userAnswer == 4)
+        {
+            SqlQuery($"update client set requisites = '{newUserData}' where user_id = {userId}");
+        }
+    }
+    public void UpdateQuery(int userId, string newCity, string newCountry)
+    {
+
+        if (!dbQueryResidence.Contains(newCity))
+        {
+            dbQueryResidence.AddRange(new[] { (Convert.ToInt32(dbQueryResidence[dbQueryResidence.Count - 3]) + 1).ToString(), newCity, newCountry });
+
+            SqlQuery($"update client set city_id = '{Convert.ToInt32(dbQueryResidence[dbQueryResidence.Count - 3])}' where user_id = {userId}");
+        }
+        else
+        {
+            SqlQuery($"update client set city_id = '{dbQueryResidence[dbQueryResidence.IndexOf(newCity) - 1]}'");
+        }
+
+    }
+
 }

@@ -1,13 +1,4 @@
-﻿using Npgsql.Replication.PgOutput.Messages;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Bank;
+﻿namespace Bank;
 
 public class Communication
 {
@@ -15,6 +6,7 @@ public class Communication
     public Communication()
     {
         user = new QueryTool();
+        user.ListCompletion();
     }
     private void StartMenu()
     {
@@ -39,15 +31,14 @@ public class Communication
         Console.WriteLine("Введите реквизиты");
         string requisites = Console.ReadLine();
         Console.WriteLine();
-        Console.WriteLine("Введите город проживания");
+        Console.WriteLine("Введите город");
         string city = Console.ReadLine();
         Console.WriteLine();
-        Console.WriteLine("Введите страну проживания");
+        Console.WriteLine("Введите страну");
         string country = Console.ReadLine();
         Console.WriteLine();
 
-        user.ListCompletion();
-        string userId = user.InsertQuery(fullName, phone, requisites, city, country);
+        int userId = user.InsertQuery(fullName, phone, requisites, city, country);
 
         Console.WriteLine("Пользователь успешно добавлен!");
         Console.WriteLine($"Id добавленного пользователя: {userId}");
@@ -62,7 +53,41 @@ public class Communication
         Console.WriteLine();
         Console.WriteLine("Пользователь успешно удален!");
     }
-    private void SelecUserMenu()
+    private void UpdateMenu()
+    {
+        Console.WriteLine("Введине ID пользователя");
+        int userId = Convert.ToInt32(Console.ReadLine());
+        Console.WriteLine();
+        Console.WriteLine("------------------------------------");
+        Console.WriteLine("Какие данные вы ходите обновить?");
+        Console.WriteLine("1. ФИО");
+        Console.WriteLine("2. Номер телефона");
+        Console.WriteLine("3. Место проживания");
+        Console.WriteLine("4. Реквизиты");
+        int userAnswer = Convert.ToInt32(Console.ReadLine());
+
+        Console.WriteLine();
+
+        if(userAnswer == 3)
+        {
+            Console.WriteLine("Введите город");
+            string newCity = Console.ReadLine();
+            Console.WriteLine();
+            Console.WriteLine("Введите страну");
+            string newCountry = Console.ReadLine();
+            Console.WriteLine();
+            user.UpdateQuery(userId, newCity, newCountry);
+        }
+        else
+        {
+            Console.WriteLine("Введите новые данные");
+            string newUserData = Console.ReadLine();
+            user.UpdateQuery(userId,userAnswer, newUserData);
+        }
+        Console.WriteLine("Данные успешно обновлены!");
+
+    }
+    private void SelectUserMenu()
     {
         Console.WriteLine("Введите ID пользователя");
         int userId = Convert.ToInt32(Console.ReadLine());
@@ -92,7 +117,8 @@ public class Communication
             }
             else if(escape.Key == ConsoleKey.D3)
             {
-                
+                Console.WriteLine();
+                UpdateMenu();
             }
             else if (escape.Key == ConsoleKey.D4)
             {
@@ -102,7 +128,7 @@ public class Communication
             else if(escape.Key == ConsoleKey.D5)
             {
                 Console.WriteLine();
-                SelecUserMenu();
+                SelectUserMenu();
             }
         }
     }
