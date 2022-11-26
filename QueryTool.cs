@@ -93,7 +93,7 @@ public class QueryTool : IQueryTool
         {
             while (reader.Read())
             {
-                Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{}", reader[0], reader[1], reader[2], reader[3], reader[4]);
+                Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", reader[0], reader[1], reader[2], reader[3], reader[4]);
             }
         }
         con.Close();
@@ -124,7 +124,7 @@ public class QueryTool : IQueryTool
         }
         else
         {
-            SqlQuery($"update client set city_id = '{dbQueryResidence[dbQueryResidence.IndexOf(newCity) - 1]}'");
+            SqlQuery($"update client set city_id = '{dbQueryResidence[dbQueryResidence.IndexOf(newCity) - 1]}'"); //индекс выходить за рамки внешнего ключа исправить
         }
 
     }
