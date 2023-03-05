@@ -1,6 +1,6 @@
 ﻿namespace Bank;
 
-public class Communication
+public class Comunication
 {
     private readonly IQueryTool user;
     public Communication()
